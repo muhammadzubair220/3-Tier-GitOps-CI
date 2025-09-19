@@ -1,7 +1,6 @@
-# 🔧 DevOps Tooling Setup Guide on Linux 
+# SecureZee EKS DevOps Tooling Setup Guide
 
-This guide installs and configures the AWS CLI, Terraform, kubectl, eksctl, and sets up EKS with EBS CSI, NGINX Ingress, and cert-manager.
-
+This guide installs and configures the AWS CLI, Terraform, kubectl, eksctl, and sets up EKS with EBS CSI, NGINX Ingress, and cert-manager for the SecureZee cluster.
 
 ## 📦 Install AWS CLI
 
@@ -28,13 +27,11 @@ sudo apt-get update && sudo apt-get install terraform -y
 terraform -version
 ```
 
-
 ## ☸️ Configure kubeconfig for EKS
 
 ```bash
-aws eks --region ap-south-1 update-kubeconfig --name devopsshack-cluster
+aws eks --region us-east-1 update-kubeconfig --name securezee-cluster
 ```
-
 
 ## 🧰 Install kubectl
 
@@ -46,7 +43,6 @@ sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
 kubectl version --client
 ```
 
-
 ## ⚙️ Install eksctl
 
 ```bash
@@ -56,13 +52,12 @@ sudo mv eksctl /usr/local/bin
 eksctl version
 ```
 
-
 ## 🔐 Associate IAM OIDC Provider with EKS
 
 ```bash
 eksctl utils associate-iam-oidc-provider \
-  --region ap-south-1 \
-  --cluster devopsshack-cluster \
+  --region us-east-1 \
+  --cluster securezee-cluster \
   --approve
 ```
 
@@ -70,10 +65,10 @@ eksctl utils associate-iam-oidc-provider \
 
 ```bash
 eksctl create iamserviceaccount \
-  --region ap-south-1 \
+  --region us-east-1 \
   --name ebs-csi-controller-sa \
   --namespace kube-system \
-  --cluster devopsshack-cluster \
+  --cluster securezee-cluster \
   --attach-policy-arn arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy \
   --approve \
   --override-existing-serviceaccounts
@@ -82,20 +77,33 @@ eksctl create iamserviceaccount \
 ## 📦 Deploy Add-ons
 
 ### ✅ EBS CSI Driver
-
 ```bash
 kubectl apply -k "github.com/kubernetes-sigs/aws-ebs-csi-driver/deploy/kubernetes/overlays/stable/ecr/?ref=release-1.11"
 ```
 
 ### 🌐 NGINX Ingress Controller
-
 ```bash
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml
 ```
 
 ### 🔒 cert-manager
-
 ```bash
 kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.12.0/cert-manager.yaml
 ```
 
+## 🔍 Verify Installation
+
+```bash
+kubectl get nodes
+kubectl get pods -n kube-system
+kubectl get pods -n ingress-nginx
+kubectl get pods -n cert-manager
+```
+
+## 🚀 Quick Start Script
+
+```bash
+#!/bin/bash
+# Run all setup commands
+curl -s https://raw.githubusercontent.com/muhammadzubair220/EKS-Terraform/main/setup.sh | bash
+```
