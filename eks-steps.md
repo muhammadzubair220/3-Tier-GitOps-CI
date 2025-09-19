@@ -1,5 +1,5 @@
 # SecureZee EKS DevOps Tooling Setup Guide
-
+ 
 This guide installs and configures the AWS CLI, Terraform, kubectl, eksctl, and sets up EKS with EBS CSI, NGINX Ingress, and cert-manager for the SecureZee cluster.
 
 ## 📦 Install AWS CLI
